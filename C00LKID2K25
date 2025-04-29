@@ -1,0 +1,55 @@
+-- FIX LAG SCRIPT by trn.minh.tr0089
+local Lighting = game:GetService("Lighting")
+local Terrain = workspace:FindFirstChildOfClass("Terrain")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+-- Tắt hiệu ứng ánh sáng và sương mù
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 1e10
+Lighting.Brightness = 0
+
+-- Giảm chất lượng vật liệu địa hình
+if Terrain then
+    Terrain.WaterWaveSize = 0
+    Terrain.WaterWaveSpeed = 0
+    Terrain.WaterReflectance = 0
+    Terrain.WaterTransparency = 1
+end
+
+-- Vô hiệu hóa hiệu ứng từ camera
+pcall(function()
+    local blur = Lighting:FindFirstChildOfClass("BlurEffect")
+    if blur then blur:Destroy() end
+    local sunRays = Lighting:FindFirstChildOfClass("SunRaysEffect")
+    if sunRays then sunRays:Destroy() end
+    local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
+    if bloom then bloom:Destroy() end
+end)
+
+-- Tắt các hiệu ứng Particle, Decals, và Texture
+for _, v in pairs(workspace:GetDescendants()) do
+    if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+        v:Destroy()
+    elseif v:IsA("Decal") or v:IsA("Texture") then
+        v.Transparency = 1
+    end
+end
+
+-- Giảm chất lượng hiển thị nhân vật
+for _, player in pairs(Players:GetPlayers()) do
+    if player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Material = Enum.Material.SmoothPlastic
+                part.Reflectance = 0
+            end
+        end
+    end
+end
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Fix Lag make by c00lkid2k25",
+    Text = "script make by Vietnam",
+    Duration = 5
+})

@@ -1,7 +1,8 @@
--- FIX LAG SCRIPT by trn.minh.tr0089
+-- FIX LAG + ẨN NGƯỜI CHƠI + XOÁ SKIN + XOÁ VIỀN + XOÁ BẦU TRỜI by trn.minh.tr0089
 local Lighting = game:GetService("Lighting")
 local Terrain = workspace:FindFirstChildOfClass("Terrain")
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local StarterGui = game:GetService("StarterGui")
 
 -- Tắt hiệu ứng ánh sáng và sương mù
@@ -9,7 +10,15 @@ Lighting.GlobalShadows = false
 Lighting.FogEnd = 1e10
 Lighting.Brightness = 0
 
--- Giảm chất lượng vật liệu địa hình
+-- Xoá bầu trời nếu có
+pcall(function()
+    local sky = Lighting:FindFirstChildOfClass("Sky")
+    if sky then
+        sky:Destroy()
+    end
+end)
+
+-- Giảm chất lượng địa hình
 if Terrain then
     Terrain.WaterWaveSize = 0
     Terrain.WaterWaveSpeed = 0
@@ -17,17 +26,16 @@ if Terrain then
     Terrain.WaterTransparency = 1
 end
 
--- Vô hiệu hóa hiệu ứng từ camera
+-- Xóa các hiệu ứng ánh sáng dư thừa
 pcall(function()
-    local blur = Lighting:FindFirstChildOfClass("BlurEffect")
-    if blur then blur:Destroy() end
-    local sunRays = Lighting:FindFirstChildOfClass("SunRaysEffect")
-    if sunRays then sunRays:Destroy() end
-    local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
-    if bloom then bloom:Destroy() end
+    for _, effect in pairs(Lighting:GetChildren()) do
+        if effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") then
+            effect:Destroy()
+        end
+    end
 end)
 
--- Tắt các hiệu ứng Particle, Decals, và Texture
+-- Tắt Particle, Decals, Texture
 for _, v in pairs(workspace:GetDescendants()) do
     if v:IsA("ParticleEmitter") or v:IsA("Trail") then
         v:Destroy()
@@ -36,20 +44,31 @@ for _, v in pairs(workspace:GetDescendants()) do
     end
 end
 
--- Giảm chất lượng hiển thị nhân vật
+-- Ẩn tất cả người chơi khác
 for _, player in pairs(Players:GetPlayers()) do
-    if player.Character then
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Material = Enum.Material.SmoothPlastic
-                part.Reflectance = 0
-            end
+    if player ~= LocalPlayer and player.Character then
+        player.Character:Destroy()
+    end
+end
+
+-- Xóa skin nhân vật và xóa viền
+if LocalPlayer.Character then
+    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+        if part:IsA("Accessory") or part:IsA("Clothing") or part:IsA("ShirtGraphic") or part:IsA("Pants") or part:IsA("Shirt") then
+            part:Destroy()
+        elseif part:IsA("BasePart") then
+            part.Material = Enum.Material.Plastic
+            part.Reflectance = 0
+            part.Color = Color3.fromRGB(255, 255, 255)
+            part.CastShadow = false
+        elseif part:IsA("SurfaceAppearance") then
+            part:Destroy()
         end
     end
 end
 
 StarterGui:SetCore("SendNotification", {
-    Title = "Fix Lag make by c00lkid2k25",
-    Text = "script make by Vietnam",
-    Duration = 5
+    Title = "script make by c00lkid2k25",
+    Text = "script Việt Nam 🇻🇳!",
+    Duration = 6
 })
